@@ -6,7 +6,11 @@ import seaborn as sns #Visualization
 import json 
 import os
 from sys import exit
+
+#from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+#from sklearn.metrics import mean_squared_error, r2_score
+
 import statsmodels.api as sm
 
 def check_file(path_name : str):
@@ -188,7 +192,7 @@ def ascendant_AIC(output_data, input_data):
 
     return meilleur_modele
 
-"""def ascendant_BIC(output_data, input_data):
+def ascendant_BIC(output_data, input_data):
     input_data_model = sm.add_constant(input_data)
     model = sm.OLS(output_data, input_data_model).fit()
     modele_ameliorable = True
@@ -221,7 +225,46 @@ def ascendant_AIC(output_data, input_data):
     check_model(meilleur_modele)
 
     return meilleur_modele
-"""
+
+def ridge_lasso():
+    from sklearn.linear_model import LinearRegression
+    from sklearn.linear_model import Ridge
+    from sklearn.linear_model import Lasso
+
+    from sklearn.metrics import r2_score
+
+    # Données d'entrée
+    filename = './datasource/Wines.csv'
+
+    # Variables explicatives
+    input_variable = [
+        'fixed acidity', 
+        'volatile acidity', 
+        'citric acid', 
+        'residual sugar',
+        'chlorides', 
+        'free sulfur dioxide', 
+        'total sulfur dioxide', 
+        'density',
+        'pH', 
+        'sulphates', 
+        'alcohol']
+
+    # Variable cible
+    output_variable = 'quality'
+
+    # Chargement du dataset et séparation les variables explicatives et la variable cible
+    dataframe_wine, input_data, output_data = load_dataset(filename, input_variable, output_variable)
+
+    # Séparation du jeu de données en base d'apprentissage (75%) et base de test (25%)
+    input_data_train, input_data_test, output_data_train, output_data_test = train_test_split(input_data, output_data, test_size=0.25, random_state=1)
+
+    ridge = Ridge(alpha=.3) #coefficients are prevented to become too big by this alpha value
+    ridge.fit(input_data_train,output_data_train)
+    
+    print(ridge.score(input_data_train, output_data_train))
+    print(ridge.score(input_data_test, output_data_test))
+
 
 def main():
     # Chargement du dataset et séparation les variables explicatives et la variable cible
