@@ -2,3 +2,4 @@ __pycache__/*
 .venv/*
 api/endpoints/__pycache__
 api/endpoints/.venv
+.ipynb_checkpoints/*
