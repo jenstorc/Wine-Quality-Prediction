@@ -117,6 +117,40 @@ Permet de réentrainer le modèle
 • Il doit prendre en compte les données rajoutées a posteriori
 """
 @app.post("/api/model/retrain/")
-async def retrain_model():
-    model = "aaa"
+async def retrain_model(model: str, inputfile: str):
+    """
+    model.save('./MyModel_tf',save_format='tf')
+    # loading the saved model
+    loaded_model = tf.keras.models.load_model('./MyModel_tf')
+
+    # retraining the model
+    loaded_model.fit(x_train, y_train, epochs = 10, validation_data = (x_test,y_test),verbose=1
+    """
+
+
+    """ 
+    loaded_model = joblib.load(filename)
+    result = loaded_model.score(X_test, y_test)
+    print(result)
+    """
+
+    """ 
+     log_regression_model =  linear_model.LogisticRegression(warm_start = True)
+    log_regression_model.fit(X, Y)
+    # Saved this model as .pkl file on filesystem like pickle.dump(model,open('model.pkl', wb))
+    #open the model from filesystem
+    log_regression_model = pickle.load(open('model.pkl','rb'))
+    log_regression_model.fit(X, Y) # New X, Y here is data of last 24 hours only. Few hundreds records only.
+    """
+
+    """
+    # Load from file
+    with open(pkl_filename, 'rb') as file:
+        pickle_model = pickle.load(file)
+        
+    # Calculate the accuracy score and predict target values
+    score = pickle_model.score(Xtest, Ytest)
+    print("Test score: {0:.2f} %".format(100 * score))
+    Ypredict = pickle_model.predict(Xtest) 
+    """
     return model 
