@@ -444,6 +444,10 @@ def main():
     print("\n\n\n\n\ncoucou")
     random_forest_main(dataframe_wine, input_variable, output_variable)
 
+# TODO : tout tester
+
+# TODO : faire le cas où les fichiers split n'existent pas
+
 # MAIN FUNCTIONS
 # POST /api/predict
 def prediction(input_wine : dict) -> int :
@@ -476,6 +480,7 @@ def prediction(input_wine : dict) -> int :
 
     return prediction
 
+# TODO : à faire :'(
 # GET /api/predict
 def find_perfect_wine() -> dict :
     """ 
