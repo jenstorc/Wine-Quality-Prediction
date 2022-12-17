@@ -12,8 +12,9 @@ import joblib # save model
 from sklearn.preprocessing import StandardScaler  # importing module for feature scaling
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
+# GENERAL FUNCTION
 def check_file(path_name : str):
     """ Arrêt du programme si le nom du fichier donné en paramètre n'existe pas ou n'est pas lisible
 
@@ -131,6 +132,66 @@ def load_dataset(filename : str, lst_input_variables : list, output_variable : s
         print(e)
         exit()
 
+def save_split_data():
+    """ 
+        Splits train and test data and saves them in datasource repertory
+    """
+    # Chargement du dataset et séparation les variables explicatives et la variable cible
+    input_variable, output_variable = open_json_file('./datasource/variable.json')
+    _, input_data, output_data = load_dataset('./datasource/Wines.csv', input_variable, output_variable)
+
+    # Séparation du jeu de données en base d'apprentissage (75%) et base de test (25%)
+    input_data_train, input_data_test, output_data_train, output_data_test = train_test_split(input_data, output_data, test_size=0.25, random_state=1)
+        
+    input_data_train.to_csv('./datasource/input_data_train.csv', index=False)
+    input_data_test.to_csv('./datasource/input_data_test.csv', index=False)
+    output_data_train.to_csv('./datasource/output_data_train.csv', index=False)
+    output_data_test.to_csv('./datasource/output_data_test.csv', index=False)
+
+def open_saved_split_data() -> tuple :
+    """
+        Checks that split datas (train / test) exist and returns them as DataFrame
+
+    Returns:
+        pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame: _description_
+    """
+    check_file('./datasource/input_data_train.csv')
+    input_data_train = pd.read_csv('./datasource/input_data_train.csv')
+    check_file('./datasource/input_data_test.csv')
+    input_data_test = pd.read_csv('./datasource/input_data_test.csv')
+    check_file('./datasource/output_data_train.csv')
+    output_data_train = pd.read_csv('./datasource/output_data_train.csv')
+    check_file('./datasource/output_data_test.csv')
+    output_data_test = pd.read_csv('./datasource/output_data_test.csv')
+
+    return(input_data_train, input_data_test, output_data_train, output_data_test)
+
+def load_model() -> RandomForestClassifier:
+    """ Load the random forest classifier model
+
+    Returns:
+        RandomForestClassifier: the random forest classifier model
+    """
+    path_name = "./random_forest.joblib"
+
+    # check if the path and the file exists.
+    check_file(path_name)
+
+    # load, no need to initialize the loaded_rf
+    loaded_model_rfc = joblib.load(path_name)
+
+    return loaded_model_rfc
+
+def save_model(model : RandomForestClassifier):
+    """ Save the current random forest classifier model
+
+    Args:
+        model (RandomForestClassifier): current model (random forest classifier)
+    """
+    # save
+    joblib.dump(model, "./random_forest.joblib")
+
+# DATA INFORMATIONS
 def data_exploration(dataframe : pd.DataFrame) :
     """ Displays dataframe informations and describes it
 
@@ -193,7 +254,6 @@ def data_visualisation(dataframe : pd.DataFrame, output_variable : str):
     plt.xticks(rotation=45)
     plt.show()
 
-# TODO : brouillon
 def data_preprocessing(dataframe : pd.DataFrame, input_variable : list, output_variable : str):
 
     print("\n\n----- DATA PREPROCESSING -----")
@@ -263,7 +323,7 @@ def data_preprocessing(dataframe : pd.DataFrame, input_variable : list, output_v
     return dataframe
 
 # RANDOM FOREST CLASSIFIER
-
+# TODO : non fini
 def random_forest_main(dataframe : pd.DataFrame, input_var : list, output_var : str):
     # divide the dataframe into attributes and labels
     X = dataframe[input_var]
@@ -281,19 +341,7 @@ def random_forest_main(dataframe : pd.DataFrame, input_var : list, output_var : 
 
     random_forest_classifier_model(X_train_scaled, X_test_scaled, y_train, y_test, input_var)
 
-    """print("Apres choix var expl : ")
-
-    input_var_2 = backward_selected_forest(X_train, y_train, input_var, 0.05)
-
-    X_train_2 = X_train[input_var_2]
-    X_test_2 = X_test[input_var_2]
-    scaler = StandardScaler()  # instantiating StandardScaler class
-    scaler.fit(X_train_2)  # fitting standardization on feature dataframe
-    X_train_scaled_2 = pd.DataFrame(scaler.transform(X_train_2), columns = input_var_2) # transforming feature dataframe into standardized feature dataframe
-    X_test_scaled_2 = pd.DataFrame(scaler.transform(X_test_2), columns = input_var_2)  # transforming new dataframe into standardized form
-
-    forest(X_train_scaled_2, X_test_scaled_2, y_train, y_test)"""
-
+# TODO : non fini
 def random_forest_classifier_model(X_train : pd.DataFrame, X_test : pd.DataFrame, y_train : pd.DataFrame, y_test : pd.DataFrame, input_var):
     # instantiate the classifier 
     rfc = RandomForestClassifier(n_estimators=100, random_state=0)
@@ -304,37 +352,9 @@ def random_forest_classifier_model(X_train : pd.DataFrame, X_test : pd.DataFrame
     # Predict the Test set results
     y_pred = rfc.predict(X_test)
 
-    pred = pd.DataFrame({'Actual': y_test.tolist(), 'Predicted': y_pred})
-    print(pred.head(10))
+    return random_forest_classifier_model
 
-    # Check accuracy score 
-
-    print('Model accuracy score with 10 decision-trees : {0:0.4f}%'. format(accuracy_score(y_test, y_pred)*100))
-
-    # Print the Confusion Matrix and slice it into four pieces
-    
-    cm = confusion_matrix(y_test, y_pred)
-    print('Confusion matrix\n\n', cm)
-
-    y = list(y_train)
-    y.extend(y_test)
-    y = set(y)
-
-    # visualize confusion matrix with seaborn heatmap
-    column_name = ['Actual Positive:'+ str(val) for val in y]
-    index_ = ['Predict Positive:'+ str(val) for val in y]
-    cm_matrix = pd.DataFrame(dataframe=cm, columns=column_name, 
-                                    index=index_)
-    plt.figure()
-    sns.heatmap(cm_matrix, annot=True, fmt='d', cmap='YlGnBu')
-    plt.show()
-
-    print("cc")
-    from sklearn.metrics import classification_report
-    print(2)
-    print(classification_report(y_test, y_pred, zero_division = 1))
-    print(3)
-
+# TODO : non fini
 def backward_selected_forest(X_train : pd.DataFrame, X_test : pd.DataFrame, y_train : pd.DataFrame, y_test : pd.DataFrame, input_var : list, alpha : float) -> list :
     # instantiate the classifier 
     rfc = RandomForestClassifier(n_estimators=100, random_state=0)
@@ -374,51 +394,8 @@ def backward_selected_forest(X_train : pd.DataFrame, X_test : pd.DataFrame, y_tr
 
     from sklearn.metrics import classification_report
     print(classification_report(y_test, y_pred))
-        
-def random_forest_model(dataframe : pd.DataFrame, input_var : list, output_var : str):
 
-
-    print("\n\n----- RANDOM FOREST -----")
-    #Integer encoding
-    X = dataframe[input_var]
-    y = dataframe[output_var]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
-
-    model = RandomForestClassifier(n_jobs=-1)
-    # Try different numbers of n_estimators - this will take a minute or so
-    estimators = np.arange(10, 200, 10)
-    scores = []
-    for n in estimators:
-        model.set_params(n_estimators=n)
-        model.fit(X_train, y_train)
-        scores.append(model.score(X_test, y_test))
-    plt.figure(figsize=(7, 5))
-    plt.title("Effect of Estimators")
-    plt.xlabel("no. estimator")
-    plt.ylabel("score")
-    plt.plot(estimators, scores)
-    plt.show()
-    results = list(zip(estimators,scores))
-
-    model.set_params(n_estimators = estimators[np.argmax(scores)])
-
-    model.fit(X_train,y_train)
-    predictions = model.predict(X_test)
-    predictions_round = [int(round(value, 0)) for value in predictions]
-
-    pred = pd.DataFrame({'Actual': y_test.tolist(), 'Predicted': predictions,'Predicted - round': predictions_round})
-    print(pred.head(10))
-
-    #evaluation
-    print("\n\nPrédictions non arrondies")
-    __Evaluationmatrix(y_test, predictions)
-
-    print("\n\nPrédictions arrondies")
-    __Evaluationmatrix(y_test, predictions_round)
-
-    print("\n\nAccuracy")
-    print(model.score(X_test,y_test))
-
+# TODO : non fini      
 def main():
     
     # Chargement du dataset et séparation les variables explicatives et la variable cible
@@ -427,7 +404,11 @@ def main():
 
     # Séparation du jeu de données en base d'apprentissage (75%) et base de test (25%)
     input_data_train, input_data_test, output_data_train, output_data_test = train_test_split(input_data, output_data, test_size=0.25, random_state=1)
-
+    
+    input_data_train.to_csv('./datasource/input_data_train', index=False)
+    input_data_test.to_csv('./datasource/input_data_test', index=False)
+    output_data_train.to_csv('./datasource/output_data_train', index=False)
+    input_data_train.to_csv('./datasource/output_data_test', index=False)
 
     print("Frequency distribution of categorical variables")
     categorical = [i for i in range(10)]
@@ -463,88 +444,177 @@ def main():
     print("\n\n\n\n\ncoucou")
     random_forest_main(dataframe_wine, input_variable, output_variable)
 
-main()
-
-
-def load_model() -> RandomForestClassifier:
-    """ Load the random forest classifier model
-
-    Returns:
-        RandomForestClassifier: the random forest classifier model
+# MAIN FUNCTIONS
+# POST /api/predict
+def prediction(input_wine : dict) -> int :
     """
-    path_name = "./random_forest.joblib"
-
-    # check if the path and the file exists.
-    check_file(path_name)
-
-    # load, no need to initialize the loaded_rf
-    loaded_model_rfc = joblib.load(path_name)
-
-    return loaded_model_rfc
-
-def save_model(model : RandomForestClassifier):
-    """ Save the current random forest classifier model
+    Realizes a prediction by giving in body the necessary data of the wine to this one
+    The prediction should be given by a score out of 10 of the wine entered.
 
     Args:
-        model (RandomForestClassifier): current model (random forest classifier)
+        input_var (dict): wine characteristics
+
+    Returns:
+        int: score of the wine
     """
-    # save
-    joblib.dump(model, "./random_forest.joblib")
+    # Open the last Random Forest Classifier model saved
+    model = load_model()
 
-"""
-• POST /api/predict permet de réaliser une prédiction en
-donnant en body les données nécessaires du vin à celle-ci
-    • La prédiction devra être donnée via une note sur 10 du vin entré."""
-def prediction(input_var : list) -> int :
+    # Open X_train data
+    X_train, _, _, _ = open_saved_split_data()
+
+    # Récupération des variables explicatives
+    input_variable, _ = open_json_file('./datasource/variable.json')
+
+    # Scale 
+    scaler = StandardScaler()  # instantiating StandardScaler class
+    scaler.fit(X_train)  # fitting standardization on feature dataframe
+    X_to_predict = pd.DataFrame(scaler.transform(input_wine), columns = input_variable)
+
+    # Prediction
+    prediction = model.predict(X_to_predict)
+
+    return prediction
+
+# GET /api/predict
+def find_perfect_wine() -> dict :
+    """ 
+    Generates a combination of value to identify the "perfect wine" (probably non-existent but statistically possible)
+    The prediction should provide the characteristics of the "perfect wine".
+
+    Returns:
+        dict: the characteristics of the "perfect wine"
+    """
     return None
 
-"""
-• GET /api/predict permet de générer une combinaison de
-données permettant d’identifier le “vin parfait” (probablement
-inexistant mais statistiquement possible)
-    • La prédiction devra fournir les caractéristiques du “vin parfait”
-"""
-def find_perfect_wine() -> list :
-    return None
-
-"""
-• GET /api/model permet d’obtenir le modèle sérialisé
-"""
+# GET /api/model permet d’obtenir le modèle sérialisé
 def get_model() :
+    """ Gets serialised model
+
+    Returns:
+        _type_: _description_
+    """
     model = load_model()
     return model
 
-""" 
-• GET /api/model/description permet d’obtenir des informations sur le modèle
-    • Paramètres du modèle
-    • Métriques de performance du modèle sur jeu de test (dernier entraînement)
-    • Autres (Dépend de l’algo utilisé)
-"""
+# GET /api/model/description permet d’obtenir des informations sur le modèle
 def get_model_information():
+    """ Gets informations about the model such as:
+        - parameters
+        - performance metrics over the test data
+        - other (depends on the algorithme)
+
+    """
+    # Get model
     model = load_model()
 
-    model.summary
+    # Open split datas
+    X_train, X_test, y_train, y_test = open_saved_split_data()
+
+    # Récupération des variables explicatives
+    input_variable, output_variable = open_json_file('./datasource/variable.json')
+
+    # Scale 
+    scaler = StandardScaler()  # instantiating StandardScaler class
+    scaler.fit(X_train)  # fitting standardization on feature dataframe
+    X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns = input_variable)
+
+    # Prediction
+    y_prediction = model.predict(X_test_scaled)
+
+    # Accuracy
+    print('Model accuracy score with 10 decision-trees : {0:0.4f}%'. format(accuracy_score(y_test, y_prediction)*100))
+
+    # Prediction VS True value
+    pred = pd.DataFrame({'Actual': y_test.tolist(), 'Predicted': y_prediction})
+    print(pred.head(10))
+
+    # Print the Confusion Matrix and slice it into four pieces
+    cm = confusion_matrix(y_test, y_prediction)
+    print('Confusion matrix\n\n', cm)
+
+    y = list(y_train)
+    y.extend(y_test)
+    y = set(y)
+
+    # visualize confusion matrix with seaborn heatmap
+    column_name = ['Actual Positive:'+ str(val) for val in y]
+    index_ = ['Predict Positive:'+ str(val) for val in y]
+    cm_matrix = pd.DataFrame(dataframe=cm, columns=column_name, 
+                                    index=index_)
+    plt.figure()
+    sns.heatmap(cm_matrix, annot=True, fmt='d', cmap='YlGnBu')
+    plt.show()
+
+    print(classification_report(y_test, y_prediction, zero_division = 1))
+
+
+    #model.summary
     return None
 
-"""
-• PUT /api/model permet d’enrichir le modèle d’une entrée de donnée supplémentaire
-(un vin en plus)
-    • Une donnée supplémentaire doit avoir le même format que le reste des données.
-"""
-def add_value_to_data(value_to_add : list):
-    return None
+# PUT /api/model
+def add_wine(dict_wine_to_add : dict):
+    """ 
+    Enriches the model with an additional data entry (one more wine).
+    An additional data must have the same format as the rest of the data
 
-""" 
-• POST /api/model/retrain permet de réentrainer le modèle
-    • Il doit prendre en compte les données rajoutées a posteriori
-"""
+    Args:
+        dict_wine_to_add (dict): dictionnary of the new wine to add
+
+    :raise Exception: at least one necessary column is missing
+    """
+    try :
+        path_csv = './datasource/Wines.csv'
+
+        # Vérifier que le fichier json existe et qu'il est lisible
+        check_file(path_csv)
+
+        # Stocke le fichier csv dans un dataframe
+        dataframe_wine = pd.read_csv(path_csv)
+
+        # Nom des colonnes nécessaires
+        list_column_names = list(dataframe_wine.columns)
+
+        # Vérifier que toutes les données nécessaires soient renseignées
+        for column_name in list_column_names:
+            if column_name not in dict_wine_to_add.key():
+                raise Exception("Erreur: Il manque la colonne >{}< dans la donnée que vous voulez insérer.".format(column_name))
+
+        # Ajouter le nouveau vin dans le dataframe
+        for column_name in list_column_names:
+            dataframe_wine[column_name].append(dict_wine_to_add[column_name])
+
+        # Enregistrer le nouveau dataframe (on écrase l'ancier)
+        dataframe_wine.to_csv(path_csv, index=False)
+
+    except Exception as e:
+        print(e)
+
+# POST /api/model/retrain 
 def model_train():
+    """
+        re-train the model taking into account the data added afterwards and save the new model    
+    """
     # Chargement du dataset et séparation les variables explicatives et la variable cible
     input_variable, output_variable = open_json_file('./datasource/variable.json')
     dataframe_wine, input_data, output_data = load_dataset('./datasource/Wines.csv', input_variable, output_variable)
 
+    save_split_data()
+
+    # Open the data
+    (input_data_train, input_data_test, output_data_train, output_data_test) = open_saved_split_data()
+
+    # Scale the model
+    scaler = StandardScaler()  # instantiating StandardScaler class
+    scaler.fit(input_data_train)  # fitting standardization on feature dataframe
+    X_train_scaled = pd.DataFrame(scaler.transform(input_data_train), columns = input_variable) # transforming feature dataframe into standardized feature dataframe
+    
     # Reentraine le modèle
-    model_rdf = train_random_forest_classifier(dataframe_wine, input_variable, output_variable)
+    #model_rfc = train_random_forest_classifier((input_data_train, input_data_test, output_data_train, output_data_test, input_variable, output_variable)
+        
+    # instantiate the classifier 
+    model_rfc = RandomForestClassifier(n_estimators=100, random_state=0)
+    model_rfc.fit(X_train_scaled, output_data_train)
 
     # Sauvegarde le modèle
-    save_model(model_rdf)
+    save_model(model_rfc)
