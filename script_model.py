@@ -539,5 +539,12 @@ def add_value_to_data(value_to_add : list):
     • Il doit prendre en compte les données rajoutées a posteriori
 """
 def model_train():
-    return None
+    # Chargement du dataset et séparation les variables explicatives et la variable cible
+    input_variable, output_variable = open_json_file('./datasource/variable.json')
+    dataframe_wine, input_data, output_data = load_dataset('./datasource/Wines.csv', input_variable, output_variable)
 
+    # Reentraine le modèle
+    model_rdf = train_random_forest_classifier(dataframe_wine, input_variable, output_variable)
+
+    # Sauvegarde le modèle
+    save_model(model_rdf)
