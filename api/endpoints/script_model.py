@@ -470,4 +470,4 @@ def test_fct():
 
     prediction(new_wine)
 
-test_fct()
+#test_fct()

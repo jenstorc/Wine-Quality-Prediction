@@ -28,13 +28,13 @@ print("hellowww", wines[1])
 app = FastAPI()
 
 # CORS authorization
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 """
 fixed acidity:  float
@@ -74,7 +74,7 @@ Permet de réaliser une prédiction en donnant en body les données nécessaires
 """
 @app.post("/api/predict/") 
 async def predict_quality(wine: Wine):
-    quality = wine.fixed_acidity + wine.alcohol
+    quality = script_model.prediction(wine)
     return quality 
 
 """
@@ -90,21 +90,12 @@ async def predict_perfect_wine():
 """
 Permet d'obtenir le modèle sérialisé
 """
-import joblib
+
+import script_model
 @app.get("/api/model/")
 async def get_model():
-
-
-    
-    loaded_model = joblib.load("model_regression_lin.sav")
-    """result = loaded_model.score(X_test, y_test)
-    print(result)
-    """
-
-    # Load from file
-    """ with open("../../model_regression_lin.pickle", 'rb') as file:
-        model = pickle.load(file)"""
-    return loaded_model
+    model = script_model.get_model()
+    return model
 
 """
 Permet d'obtenir des informations sur le modèle
@@ -114,8 +105,8 @@ Permet d'obtenir des informations sur le modèle
 """
 @app.get("/api/model/description/")
 async def get_model():
-    model = "aaa"
-    return model
+    model_description = script_model.get_model_information()
+    return model_description
 
 """
 Permet d'enrichir le modèle d'une entrée de donnée supplémentaire
@@ -124,51 +115,21 @@ Permet d'enrichir le modèle d'une entrée de donnée supplémentaire
 """
 @app.put("/api/model/")
 async def add_wine(new_wine: WineFull = Body()):
-    file = readFile(inputFile)
-    last_id= file[-1][len(file[-1])-1]
-    #print("--------last line-----", last_id)
-    new_wine.id = int(last_id) + 1
-    #print("----------new wine--", new_wine)
-    #print('----------new_wine.__dict__.values()-----',new_wine.__dict__.values())
-    writeFile(inputFile, new_wine.__dict__.values())
+    # file = readFile(inputFile)
+    # last_id= file[-1][len(file[-1])-1]
+    # #print("--------last line-----", last_id)
+    # new_wine.id = int(last_id) + 1
+    # #print("----------new wine--", new_wine)
+    # #print('----------new_wine.__dict__.values()-----',new_wine.__dict__.values())
+    # writeFile(inputFile, new_wine.__dict__.values())
+    script_model.add_wine(new_wine)
     return 0
 
 """
 Permet de réentrainer le modèle
 • Il doit prendre en compte les données rajoutées a posteriori
 """
-import pickle
 @app.post("/api/model/retrain/")
 async def retrain_model(): #model: str, inputfile: str
-    """
-    model.save('./MyModel_tf',save_format='tf')
-    # loading the saved model
-    loaded_model = tf.keras.models.load_model('./MyModel_tf')
-
-    # retraining the model
-    loaded_model.fit(x_train, y_train, epochs = 10, validation_data = (x_test,y_test),verbose=1
-    """
-
-
-
-    """ 
-     log_regression_model =  linear_model.LogisticRegression(warm_start = True)
-    log_regression_model.fit(X, Y)
-    # Saved this model as .pkl file on filesystem like pickle.dump(model,open('model.pkl', wb))
-    #open the model from filesystem
-    log_regression_model = pickle.load(open('model.pkl','rb'))
-    log_regression_model.fit(X, Y) # New X, Y here is data of last 24 hours only. Few hundreds records only.
-    """
-
-    
-   
-        
-    """ 
-   # Calculate the accuracy score and predict target values
-    score = pickle_model.score(Xtest, Ytest)
-    print("Test score: {0:.2f} %".format(100 * score))
-    Ypredict = pickle_model.predict(Xtest) 
-    """
-    #print("yooooooooooooooooooo",model)
-    model = "coucocuocucoucou"
-    return model 
+    script_model.model_train()
+    return 0 
