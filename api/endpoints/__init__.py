@@ -109,7 +109,7 @@ Permet d'obtenir des informations sur le modèle
 @app.get("/api/model/description/")
 async def get_model():
     model_description = script_model.get_model_information()
-    return {"Paramètres du modèle" : model_description["Paramètres du modèle"], "Métriques principales": model_description["Métriques principales"]}
+    return {"param_model" : model_description["param_model"], "main_metrics": model_description["main_metrics"]}
 
 """
 Permet d'enrichir le modèle d'une entrée de donnée supplémentaire
@@ -118,7 +118,7 @@ Permet d'enrichir le modèle d'une entrée de donnée supplémentaire
 """
 @app.put("/api/model/")
 async def add_wine(new_wine: WineFull = Body()):
-    script_model.add_wine(new_wine.__dict__)
+    script_model.add_wine(new_wine)
     return {"add_wine": "New wine was added"}
 
 """
@@ -126,6 +126,6 @@ Permet de réentrainer le modèle
 • Il doit prendre en compte les données rajoutées a posteriori
 """
 @app.post("/api/model/retrain/")
-async def retrain_model(): #model: str, inputfile: str
+async def retrain_model(): 
     script_model.model_train()
     return 0 
