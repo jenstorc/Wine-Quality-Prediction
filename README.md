@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Wine-Quality-Predictiongit
-=======
 # Wine-Quality-Prediction
 
 ## Choix du modèle
@@ -18,4 +15,17 @@ Ainsi, nous avons utilisé la librairie lazypredict dans un premier temps pour l
 ![lazy_predict_classifier](img/lazy_predict_regressor.png)
 
 C'est pourquoi nous nous sommes orientées vers une classification via les forêts aléatoires (RandomForestClassifier). Pour cela, nous utilisons la librairies Scikit-Learn qui "fournit une sélection d'outils efficaces pour l'apprentissage automatique et la modélisation statistique, notamment la classification, la régression et le clustering via une interface cohérente en Python".
->>>>>>> origin/modele_ML
+
+## Démarrer Fast Api
+Start virtual environnement :
+``python3.8 -m venv .venv``
+``source .venv/bin/activate``
+``conda deactivate``
+``pip install --upgrade pip``
+``pip install -r requirements.txt``
+
+Start server : 
+``uvicorn __init__:app --reload``
+
+Open : http://127.0.0.1:8000/docs
+On a web page to try functions
