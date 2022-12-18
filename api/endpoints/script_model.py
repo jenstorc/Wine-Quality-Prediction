@@ -317,8 +317,12 @@ def prediction(new_wine : Wine) -> int :
 
     # Prédiction
     prediction = model.predict(df_new_wine_scaled)
+<<<<<<< HEAD
     print("precition = ",prediction[0])
     return prediction[0]
+=======
+    return {"prediction" : prediction[0]}
+>>>>>>> origin/modele_ML
 
 # TODO : à faire :'(
 # GET /api/predict
@@ -330,10 +334,10 @@ def find_perfect_wine() -> dict :
     Returns:
         dict: the characteristics of the "perfect wine"
     """
-    
-    return None
+    # Open the last Random Forest Classifier model saved
+    model = __load_model()
 
-
+    return {}
 
 # GET /api/model permet d’obtenir le modèle sérialisé
 def get_model() :
@@ -377,15 +381,21 @@ def get_model_information() -> dict :
     cm = confusion_matrix(y_test, y_prediction)
     
     dict_result = {
+<<<<<<< HEAD
         "Paramètres du modèle": model.get_params(),
         "Métriques principales": classification_report(y_test, y_prediction, zero_division = 1),
         "Matrice de confusion sur y_test" : cm
+=======
+        "param_model": model.get_params(),
+        "main_metrics": classification_report(y_test, y_prediction, zero_division = 1),
+        "confusion_matrix" : cm
+>>>>>>> origin/modele_ML
     }
 
     return dict_result
 
 # PUT /api/model
-def add_wine(dict_wine_to_add : dict):
+def add_wine(new_wine : WineFull):
     """ 
     Enriches the model with an additional data entry (one more wine).
     An additional data must have the same format as the rest of the data
@@ -407,14 +417,28 @@ def add_wine(dict_wine_to_add : dict):
         # Nom des colonnes nécessaires
         list_column_names = list(dataframe_wine.columns)
 
-        # Vérifier que toutes les données nécessaires soient renseignées
-        for column_name in list_column_names:
-            if column_name not in dict_wine_to_add.key():
-                raise Exception("Erreur: Il manque la colonne >{}< dans la donnée que vous voulez insérer.".format(column_name))
+        # nouveau vin
+        new_wine = [
+            new_wine.fixed_acidity, 
+            new_wine.volatile_acidity,
+            new_wine.citric_acid,
+            new_wine.residual_sugar,
+            new_wine.chlorides,
+            new_wine.free_sulfur_dioxide,
+            new_wine.total_sulfur_dioxide,
+            new_wine.density,
+            new_wine.pH,
+            new_wine.sulphates,
+            new_wine.alcohol, 
+            new_wine.quality,
+            new_wine.id
+        ]
 
         # Ajouter le nouveau vin dans le dataframe
+        item = 0
         for column_name in list_column_names:
-            dataframe_wine[column_name].append(dict_wine_to_add[column_name])
+            dataframe_wine[column_name].append(new_wine[item])
+            item += 1
 
         # Enregistrer le nouveau dataframe (on écrase l'ancier)
         dataframe_wine.to_csv(path_csv, index=False)
@@ -450,7 +474,8 @@ def model_train():
 
     # Sauvegarde le modèle
     __save_model(model_rfc)
-    print("Nouveau modèle enregistré avec succès !")
+
+    return {"post" : "Nouveau modèle entraîné avec succès !"}
 
 # TODO : à supprimer à la fin
 def test_fct():
