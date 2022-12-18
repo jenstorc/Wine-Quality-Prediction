@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
+<<<<<<< HEAD
 #from __init__ import Wine, WineFull
 #from api/endpoints/__init__ import Wine, WineFull
 from pydantic import BaseModel
@@ -33,6 +34,11 @@ class Wine(BaseModel):
 class WineFull(Wine):
     quality: float
     id: int 
+=======
+# Importer les classes Wine et WineFull
+from __init__ import Wine, WineFull
+
+>>>>>>> origin/modele_ML
 # GENERAL FUNCTION
 def __check_file(path_name : str):
     """ Arrêt du programme si le nom du fichier donné en paramètre n'existe pas ou n'est pas lisible
