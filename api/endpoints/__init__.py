@@ -80,10 +80,21 @@ async def predict_perfect_wine():
 """
 Permet d'obtenir le modèle sérialisé
 """
+import joblib
 @app.get("/api/model/")
 async def get_model():
-    model = "aaa"
-    return model
+
+
+    
+    loaded_model = joblib.load("model_regression_lin.sav")
+    """result = loaded_model.score(X_test, y_test)
+    print(result)
+    """
+
+    # Load from file
+    """ with open("../../model_regression_lin.pickle", 'rb') as file:
+        model = pickle.load(file)"""
+    return loaded_model
 
 """
 Permet d'obtenir des informations sur le modèle
@@ -116,8 +127,9 @@ async def add_wine(new_wine: WineFull = Body()):
 Permet de réentrainer le modèle
 • Il doit prendre en compte les données rajoutées a posteriori
 """
+import pickle
 @app.post("/api/model/retrain/")
-async def retrain_model(model: str, inputfile: str):
+async def retrain_model(): #model: str, inputfile: str
     """
     model.save('./MyModel_tf',save_format='tf')
     # loading the saved model
@@ -128,11 +140,6 @@ async def retrain_model(model: str, inputfile: str):
     """
 
 
-    """ 
-    loaded_model = joblib.load(filename)
-    result = loaded_model.score(X_test, y_test)
-    print(result)
-    """
 
     """ 
      log_regression_model =  linear_model.LogisticRegression(warm_start = True)
@@ -143,14 +150,15 @@ async def retrain_model(model: str, inputfile: str):
     log_regression_model.fit(X, Y) # New X, Y here is data of last 24 hours only. Few hundreds records only.
     """
 
-    """
-    # Load from file
-    with open(pkl_filename, 'rb') as file:
-        pickle_model = pickle.load(file)
+    
+   
         
-    # Calculate the accuracy score and predict target values
+    """ 
+   # Calculate the accuracy score and predict target values
     score = pickle_model.score(Xtest, Ytest)
     print("Test score: {0:.2f} %".format(100 * score))
     Ypredict = pickle_model.predict(Xtest) 
     """
+    #print("yooooooooooooooooooo",model)
+    model = "coucocuocucoucou"
     return model 

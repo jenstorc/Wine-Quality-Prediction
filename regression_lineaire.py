@@ -265,7 +265,7 @@ def ridge_lasso():
     print(ridge.score(input_data_train, output_data_train))
     print(ridge.score(input_data_test, output_data_test))
 
-
+import joblib
 def main():
     # Chargement du dataset et séparation les variables explicatives et la variable cible
     input_variable, output_variable = open_json_file('./datasource/variable.json')
@@ -290,5 +290,9 @@ def main():
 
     model_best_aic = ascendant_AIC(output_data_train, input_data_train)
     #model_best = ascendant_BIC(output_data_train, input_data_train)
+
+    model.save("model_regression_lin.pkl")
+    filename = 'model_regression_lin..sav'
+    joblib.dump(model, filename)
 
 main()
