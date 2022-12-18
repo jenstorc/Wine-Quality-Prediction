@@ -3,6 +3,9 @@ from pydantic import BaseModel
 import csv
 from csv import writer
 from fastapi.middleware.cors import CORSMiddleware
+import script_model
+import os
+from fastapi.responses import FileResponse
 
 def readFile(inputFile):
     data = []
@@ -72,9 +75,9 @@ Permet de réaliser une prédiction en donnant en body les données nécessaires
 • La prédiction devra être donnée via une note sur 10 du vin entré.
 """
 @app.post("/api/predict/") 
-async def predict_quality(wine: Wine):
+async def predict_quality(wine: Wine, quality: int = None):
     quality = script_model.prediction(wine)
-    return quality 
+    return {"predicted_quality": int(quality)}
 
 """
 Permet de générer une combinaison de données permettant d'identifier le “vin parfait” (probablement
@@ -89,12 +92,13 @@ async def predict_perfect_wine():
 """
 Permet d'obtenir le modèle sérialisé
 """
-
-import script_model
 @app.get("/api/model/")
-async def get_model():
-    model = script_model.get_model()
-    return model
+async def get_model(model_name='random_forest.joblib'):
+    script_model.get_model()
+    path = os.path.join('../../model/', model_name)
+    
+    if os.path.exists(path):
+        return FileResponse(path, media_type="text/plain", filename=model_name)
 
 """
 Permet d'obtenir des informations sur le modèle
@@ -103,9 +107,9 @@ Permet d'obtenir des informations sur le modèle
 • Autres (Dépend de l'algo utilisé)
 """
 @app.get("/api/model/description/")
-async def get_model():
-    model_description = script_model.get_model_information()
-    return model_description
+async def get_model(model_description: str = None):
+    script_model.get_model_information()
+    return 0
 
 """
 Permet d'enrichir le modèle d'une entrée de donnée supplémentaire
@@ -114,13 +118,6 @@ Permet d'enrichir le modèle d'une entrée de donnée supplémentaire
 """
 @app.put("/api/model/")
 async def add_wine(new_wine: WineFull = Body()):
-    # file = readFile(inputFile)
-    # last_id= file[-1][len(file[-1])-1]
-    # #print("--------last line-----", last_id)
-    # new_wine.id = int(last_id) + 1
-    # #print("----------new wine--", new_wine)
-    # #print('----------new_wine.__dict__.values()-----',new_wine.__dict__.values())
-    # writeFile(inputFile, new_wine.__dict__.values())
     script_model.add_wine(new_wine)
     return 0
 

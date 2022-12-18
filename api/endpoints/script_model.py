@@ -317,6 +317,7 @@ def prediction(new_wine : Wine) -> int :
 
     # Prédiction
     prediction = model.predict(df_new_wine_scaled)
+    print("precition = ",prediction[0])
     return prediction[0]
 
 # TODO : à faire :'(
