@@ -294,7 +294,8 @@ def prediction(new_wine : Wine) -> int :
     scaler = StandardScaler()  # instantiating StandardScaler class
     scaler.fit(X_train)  # fitting standardization on feature dataframe
 
-    array_wine = np.array([
+    # Récupérer les informations du premier élément
+    array_new_wine = np.array([[
         new_wine.fixed_acidity, 
         new_wine.volatile_acidity,
         new_wine.citric_acid,
@@ -306,15 +307,17 @@ def prediction(new_wine : Wine) -> int :
         new_wine.pH,
         new_wine.sulphates,
         new_wine.alcohol
-        ])
+        ]])
 
-    print(array_wine)
-    df_new_wine_scaled = pd.DataFrame(scaler.transform(array_wine), columns = input_variable)
+    # Les transformer en dataframe
+    df_new_wine = pd.DataFrame(array_new_wine, columns = input_variable)
 
-    # Prediction
+    # Scale les valeurs
+    df_new_wine_scaled = pd.DataFrame(scaler.transform(df_new_wine), columns = input_variable)
+
+    # Prédiction
     prediction = model.predict(df_new_wine_scaled)
-
-    return prediction
+    return prediction[0]
 
 # TODO : à faire :'(
 # GET /api/predict
@@ -326,7 +329,10 @@ def find_perfect_wine() -> dict :
     Returns:
         dict: the characteristics of the "perfect wine"
     """
+    
     return None
+
+
 
 # GET /api/model permet d’obtenir le modèle sérialisé
 def get_model() :
@@ -427,8 +433,8 @@ def model_train():
     """
     # Chargement du dataset et séparation les variables explicatives et la variable cible
     input_variable, output_variable = __open_json_file('../../datasource/variable.json')
-    dataframe_wine, input_data, output_data = __load_dataset('../../datasource/Wines.csv', input_variable, output_variable)
 
+    # Charger le nouveau jeu de données
     __save_split_data()
 
     # Open the data
@@ -450,11 +456,12 @@ def model_train():
     __save_model(model_rfc)
     print("Nouveau modèle enregistré avec succès !")
 
+# TODO : à supprimer à la fin
 def test_fct():
     #model_train()
     get_model_information()
     
-    new_wine = Wine()
+    """new_wine = Wine()
 
     new_wine.fixed_acidity = 11.2
     new_wine.volatile_acidity = 0.7
@@ -466,8 +473,8 @@ def test_fct():
     new_wine.density = 0.9978
     new_wine.pH = 3.51
     new_wine.sulphates = 0.56
-    new_wine.alcohol = 9.4
+    new_wine.alcohol = 9.4"""
 
-    prediction(new_wine)
+    prediction()
 
 #test_fct()
