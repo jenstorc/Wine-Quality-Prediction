@@ -377,7 +377,7 @@ def get_model_information() -> dict :
     cm = confusion_matrix(y_test, y_prediction)
     
     dict_result = {
-        "Pamètres du modèle": model.get_params(),
+        "Paramètres du modèle": model.get_params(),
         "Métriques principales": classification_report(y_test, y_prediction, zero_division = 1),
         "Matrice de confusion sur y_test" : cm
     }
