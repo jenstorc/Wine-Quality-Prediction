@@ -14,6 +14,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
+from __init__ import Wine, WineFull
+
 # GENERAL FUNCTION
 def check_file(path_name : str):
     """ Arrêt du programme si le nom du fichier donné en paramètre n'existe pas ou n'est pas lisible
@@ -450,7 +452,7 @@ def main():
 
 # MAIN FUNCTIONS
 # POST /api/predict
-def prediction(input_wine : dict) -> int :
+def prediction(new_wine : Wine) -> int :
     """
     Realizes a prediction by giving in body the necessary data of the wine to this one
     The prediction should be given by a score out of 10 of the wine entered.
@@ -473,10 +475,27 @@ def prediction(input_wine : dict) -> int :
     # Scale 
     scaler = StandardScaler()  # instantiating StandardScaler class
     scaler.fit(X_train)  # fitting standardization on feature dataframe
-    X_to_predict = pd.DataFrame(scaler.transform(input_wine), columns = input_variable)
+
+    array_wine = np.array([
+        new_wine.fixed_acidity, 
+        new_wine.volatile_acidity,
+        new_wine.citric_acid,
+        new_wine.residual_citric,
+        new_wine.chlorides,
+        new_wine.free_sulfur_dioxide,
+        new_wine.total_sulfur_dioxide,
+        new_wine.density,
+        new_wine.pH,
+        new_wine.sulphates,
+        new_wine.alcohol
+        ])
+
+    print(array_wine)
+    X_to_predict_scaled = pd.DataFrame(scaler.transform(array_wine), columns = input_variable)
+    print("\n\n 3 \n\n")
 
     # Prediction
-    prediction = model.predict(X_to_predict)
+    prediction = model.predict(X_to_predict_scaled)
 
     return prediction
 
@@ -528,34 +547,25 @@ def get_model_information():
     y_prediction = model.predict(X_test_scaled)
 
     # Accuracy
-    print('Model accuracy score with 10 decision-trees : {0:0.4f}%'. format(accuracy_score(y_test, y_prediction)*100))
+    print('Model accuracy score with 10 decision-trees : {0:0.4f}%\n'. format(accuracy_score(y_test, y_prediction)*100))
 
     # Prediction VS True value
-    pred = pd.DataFrame({'Actual': y_test.tolist(), 'Predicted': y_prediction})
-    print(pred.head(10))
+    pred = pd.DataFrame({'Actual': y_test["quality"].tolist(), 'Predicted': y_prediction})
+    print('Some actual values VS Predictions :\n', pred.head(10))
 
     # Print the Confusion Matrix and slice it into four pieces
     cm = confusion_matrix(y_test, y_prediction)
-    print('Confusion matrix\n\n', cm)
+    print('\n\nConfusion matrix :\n', cm)
 
     y = list(y_train)
     y.extend(y_test)
     y = set(y)
 
-    # visualize confusion matrix with seaborn heatmap
-    column_name = ['Actual Positive:'+ str(val) for val in y]
-    index_ = ['Predict Positive:'+ str(val) for val in y]
-    cm_matrix = pd.DataFrame(dataframe=cm, columns=column_name, 
-                                    index=index_)
-    plt.figure()
-    sns.heatmap(cm_matrix, annot=True, fmt='d', cmap='YlGnBu')
-    plt.show()
-
-    print(classification_report(y_test, y_prediction, zero_division = 1))
-
+    # show the main metrics
+    print("\n\nMain metrics of the model :\n", classification_report(y_test, y_prediction, zero_division = 1))
 
     #model.summary
-    return None
+    #return None
 
 # PUT /api/model
 def add_wine(dict_wine_to_add : dict):
@@ -609,17 +619,48 @@ def model_train():
     # Open the data
     (input_data_train, input_data_test, output_data_train, output_data_test) = open_saved_split_data()
 
+    print("X_train :", input_data_train.head(10))
+    print("X_train :", input_data_train.shape)
+    print("y_train : ", output_data_train.head(10))
+    print("y_train : ", output_data_train.shape)
+
     # Scale the model
     scaler = StandardScaler()  # instantiating StandardScaler class
     scaler.fit(input_data_train)  # fitting standardization on feature dataframe
     X_train_scaled = pd.DataFrame(scaler.transform(input_data_train), columns = input_variable) # transforming feature dataframe into standardized feature dataframe
     
+    
+    print("X_train_scaled", X_train_scaled.head(10))
     # Reentraine le modèle
     #model_rfc = train_random_forest_classifier((input_data_train, input_data_test, output_data_train, output_data_test, input_variable, output_variable)
         
     # instantiate the classifier 
     model_rfc = RandomForestClassifier(n_estimators=100, random_state=0)
-    model_rfc.fit(X_train_scaled, output_data_train)
+    model_rfc.fit(X_train_scaled, output_data_train.values.ravel())
 
+    print("fin")
     # Sauvegarde le modèle
     save_model(model_rfc)
+
+
+def test_fct():
+    #model_train()
+    #get_model_information()
+    
+    new_wine = {
+        "fixed acidity" : 11.2, 
+        "volatile acidity" : 0.7, 
+        "citric acid" : 0.0, 
+        "residual sugar": 1.9, 
+        "chlorides" : 0.076, 
+        "free sulfur dioxide" : 11.0, 
+        "total sulfur dioxide" : 34.0, 
+        "density": 0.9978, 
+        "pH": 3.51, 
+        "sulphates": 0.56, 
+        "alcohol": 9.4
+        }
+        
+    prediction(new_wine)
+
+test_fct()
