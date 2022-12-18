@@ -300,7 +300,7 @@ def prediction(new_wine : Wine) -> int :
 
     # Prédiction
     prediction = model.predict(df_new_wine_scaled)
-    return prediction[0]
+    return {"Prédiction" : prediction[0]}
 
 # TODO : à faire :'(
 # GET /api/predict
@@ -313,9 +313,7 @@ def find_perfect_wine() -> dict :
         dict: the characteristics of the "perfect wine"
     """
     
-    return None
-
-
+    return {}
 
 # GET /api/model permet d’obtenir le modèle sérialisé
 def get_model() :
@@ -367,42 +365,43 @@ def get_model_information() -> dict :
     return dict_result
 
 # PUT /api/model
-def add_wine(dict_wine_to_add : dict):
-    """ 
-    Enriches the model with an additional data entry (one more wine).
-    An additional data must have the same format as the rest of the data
+# def add_wine(dict_wine_to_add : dict):
+#     """ 
+#     Enriches the model with an additional data entry (one more wine).
+#     An additional data must have the same format as the rest of the data
 
-    Args:
-        dict_wine_to_add (dict): dictionnary of the new wine to add
+#     Args:
+#         dict_wine_to_add (dict): dictionnary of the new wine to add
 
-    :raise Exception: at least one necessary column is missing
-    """
-    try :
-        path_csv = '../../datasource/Wines.csv'
+#     :raise Exception: at least one necessary column is missing
+#     """
+#     try :
+#         path_csv = '../../datasource/Wines.csv'
 
-        # Vérifier que le fichier json existe et qu'il est lisible
-        __check_file(path_csv)
+#         # Vérifier que le fichier json existe et qu'il est lisible
+#         __check_file(path_csv)
 
-        # Stocke le fichier csv dans un dataframe
-        dataframe_wine = pd.read_csv(path_csv)
+#         # Stocke le fichier csv dans un dataframe
+#         dataframe_wine = pd.read_csv(path_csv)
 
-        # Nom des colonnes nécessaires
-        list_column_names = list(dataframe_wine.columns)
+#         # Nom des colonnes nécessaires
+#         list_column_names = list(dataframe_wine.columns)
 
-        # Vérifier que toutes les données nécessaires soient renseignées
-        for column_name in list_column_names:
-            if column_name not in dict_wine_to_add.key():
-                raise Exception("Erreur: Il manque la colonne >{}< dans la donnée que vous voulez insérer.".format(column_name))
+#         # Vérifier que toutes les données nécessaires soient renseignées
+#         for column_name in list_column_names:
+#             if column_name not in dict_wine_to_add.key():
+#                 raise Exception("Erreur: Il manque la colonne >{}< dans la donnée que vous voulez insérer.".format(column_name))
 
-        # Ajouter le nouveau vin dans le dataframe
-        for column_name in list_column_names:
-            dataframe_wine[column_name].append(dict_wine_to_add[column_name])
+#         # Ajouter le nouveau vin dans le dataframe
+#         for column_name in list_column_names:
+#             dataframe_wine[column_name].append(dict_wine_to_add[column_name])
 
-        # Enregistrer le nouveau dataframe (on écrase l'ancier)
-        dataframe_wine.to_csv(path_csv, index=False)
+#         # Enregistrer le nouveau dataframe (on écrase l'ancier)
+#         dataframe_wine.to_csv(path_csv, index=False)
 
-    except Exception as e:
-        print(e)
+#         return {"post" : "Nouveau vin"}
+#     except Exception as e:
+#         print(e)
 
 # POST /api/model/retrain 
 def model_train():
@@ -432,7 +431,8 @@ def model_train():
 
     # Sauvegarde le modèle
     __save_model(model_rfc)
-    print("Nouveau modèle enregistré avec succès !")
+
+    return {"post" : "Nouveau modèle entraîné avec succès !"}
 
 # TODO : à supprimer à la fin
 def test_fct():
