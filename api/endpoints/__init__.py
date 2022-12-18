@@ -22,7 +22,6 @@ def writeFile(outputFile, new_data):
 inputFile = '../../datasource/Wines.csv'
 wines = readFile(inputFile)
 
-print("hellowww", wines[1])
 
 app = FastAPI()
 
