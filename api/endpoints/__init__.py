@@ -2,6 +2,7 @@ from fastapi import FastAPI, Body
 from pydantic import BaseModel
 import csv
 from csv import writer
+from fastapi.middleware.cors import CORSMiddleware
 
 def readFile(inputFile):
     data = []
@@ -25,6 +26,15 @@ wines = readFile(inputFile)
 print("hellowww", wines[1])
 
 app = FastAPI()
+
+# CORS authorization
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 """
 fixed acidity:  float
