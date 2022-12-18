@@ -75,9 +75,9 @@ Permet de réaliser une prédiction en donnant en body les données nécessaires
 • La prédiction devra être donnée via une note sur 10 du vin entré.
 """
 @app.post("/api/predict/") 
-async def predict_quality(wine: Wine):
+async def predict_quality(wine: Wine, quality:int = None):
     quality = script_model.prediction(wine)
-    return {"predicted_quality": int(quality)}
+    return {"predicted_quality": int(quality["prediction"])}
 
 """
 Permet de générer une combinaison de données permettant d'identifier le “vin parfait” (probablement
@@ -128,4 +128,4 @@ Permet de réentrainer le modèle
 @app.post("/api/model/retrain/")
 async def retrain_model(): 
     script_model.model_train()
-    return 0 
+    return {"model_trained": "model retrained"}

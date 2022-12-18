@@ -316,12 +316,8 @@ def prediction(new_wine : Wine) -> int :
     dataframe_wine_new_wine_scaled = pd.DataFrame(scaler.transform(dataframe_wine_new_wine), columns = input_variable)
 
     # Prédiction
-<<<<<<< HEAD
-    prediction = model.predict(df_new_wine_scaled)
-
-=======
     prediction = model.predict(dataframe_wine_new_wine_scaled)
->>>>>>> origin/modele_ML
+
     return {"prediction" : prediction[0]}
 
 
@@ -413,6 +409,9 @@ def add_wine(new_wine : WineFull):
 
         # Nom des colonnes nécessaires
         list_column_names = list(dataframe_wine.columns)
+
+        last_id = dataframe_wine["Id"][len(dataframe_wine)-1]
+        new_wine.id = int(last_id)+1
 
         # nouveau vin
         new_wine = [
