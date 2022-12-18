@@ -206,11 +206,11 @@ def __data_exploration(dataframe : pd.DataFrame) :
     """
     # check basic features and dataframe types
     print("\n\n----- DATA EXPLORATION -----")
-    # Description du df
+    # Description du dataframe_wine
     print("\n DESCRIPTION :")
     print(dataframe.describe())
 
-    # Information du df
+    # Information du dataframe_wine
     print("\n INFORMATIONS :")
     print(dataframe.info())
 
@@ -293,13 +293,13 @@ def prediction(new_wine : Wine) -> int :
         ]])
 
     # Les transformer en dataframe
-    df_new_wine = pd.DataFrame(array_new_wine, columns = input_variable)
+    dataframe_wine_new_wine = pd.DataFrame(array_new_wine, columns = input_variable)
 
     # Scale les valeurs
-    df_new_wine_scaled = pd.DataFrame(scaler.transform(df_new_wine), columns = input_variable)
+    dataframe_wine_new_wine_scaled = pd.DataFrame(scaler.transform(dataframe_wine_new_wine), columns = input_variable)
 
     # Prédiction
-    prediction = model.predict(df_new_wine_scaled)
+    prediction = model.predict(dataframe_wine_new_wine_scaled)
     return {"prediction" : prediction[0]}
 
 # TODO : à faire :'(
@@ -407,10 +407,7 @@ def add_wine(new_wine : WineFull):
         ]
 
         # Ajouter le nouveau vin dans le dataframe
-        item = 0
-        for column_name in list_column_names:
-            dataframe_wine[column_name].append(new_wine[item])
-            item += 1
+        dataframe_wine.loc[len(dataframe_wine)] = new_wine
 
         # Enregistrer le nouveau dataframe (on écrase l'ancier)
         dataframe_wine.to_csv(path_csv, index=False)
