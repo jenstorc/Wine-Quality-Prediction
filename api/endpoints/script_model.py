@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
+# Importer les classes Wine et WineFull
 from __init__ import Wine, WineFull
 
 # GENERAL FUNCTION
