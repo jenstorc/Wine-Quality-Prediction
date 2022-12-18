@@ -300,7 +300,7 @@ def prediction(new_wine : Wine) -> int :
 
     # Prédiction
     prediction = model.predict(df_new_wine_scaled)
-    return {"Prédiction" : prediction[0]}
+    return {"prediction" : prediction[0]}
 
 # TODO : à faire :'(
 # GET /api/predict
@@ -357,9 +357,9 @@ def get_model_information() -> dict :
     cm = confusion_matrix(y_test, y_prediction)
     
     dict_result = {
-        "Pamètres du modèle": model.get_params(),
-        "Métriques principales": classification_report(y_test, y_prediction, zero_division = 1),
-        "Matrice de confusion sur y_test" : cm
+        "param_model": model.get_params(),
+        "main_metrics": classification_report(y_test, y_prediction, zero_division = 1),
+        "confusion_matrix" : cm
     }
 
     return dict_result
