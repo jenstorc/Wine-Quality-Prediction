@@ -251,6 +251,22 @@ def __data_visualisation(dataframe : pd.DataFrame, output_variable : str):
     plt.ylabel('Nombre')
     plt.show()
 
+def __order_input_var(input_var : list, lst_feature_importance : list) -> list :
+    """ modifie l'ordre des éléments de la liste 'input_var' selon l'ordre décroissant de leur importance dans le randomForestClassifier
+
+    Args:
+        input_var (list): liste des variables explicatives
+        lst_feature_importance (list): importance de chaque valeur explicative dans le modèle
+
+    Returns:
+        list: liste des variables explicatives, rangée par ordre décroissant de leur importance dans le modèle
+    """
+    result = []
+    for i in range(len(input_var)):
+        result.append(input_var[np.argmax(lst_feature_importance)])
+        lst_feature_importance.remove(np.max(lst_feature_importance))
+    return result
+
 # MAIN FUNCTIONS
 # POST /api/predict
 def prediction(new_wine : Wine) -> int :
@@ -302,7 +318,6 @@ def prediction(new_wine : Wine) -> int :
     prediction = model.predict(dataframe_wine_new_wine_scaled)
     return {"prediction" : prediction[0]}
 
-# TODO : à faire :'(
 # GET /api/predict
 def find_perfect_wine() -> dict :
     """ 
@@ -312,10 +327,48 @@ def find_perfect_wine() -> dict :
     Returns:
         dict: the characteristics of the "perfect wine"
     """
-    # Open the last Random Forest Classifier model saved
+    # Chargement du dataset, des informations sur les variables explicatives et cible, des datas pour le modèle et du modèle
     model = __load_model()
+    input_variable, output_variable = __open_json_file('../../datasource/variable.json')
+    dataframe_wine, _, _ = __load_dataset('../../datasource/Wines.csv', input_variable, output_variable)
+    X_train, _, _, _ = __open_saved_split_data() # Open X_train data
 
-    return {}
+    # Scale 
+    scaler = StandardScaler()  # instantiating StandardScaler class
+    scaler.fit(X_train)  # fitting standardization on feature dataframe
+
+    # Meilleure qualité    
+    int_max_quality = np.max(dataframe_wine[output_variable]) # Récupération de la meilleure qualité
+    df_max_quality = dataframe_wine[dataframe_wine[output_variable] == int_max_quality] # Sélection des vins ayant la meilleure qualité
+    df_max_quality = df_max_quality[input_variable] # Sélection des colonnes nécessaires
+
+    # Initialisation 
+    dataframe_new_wine = pd.DataFrame(np.zeros((2, len(input_variable))), columns = input_variable, index = ["best_wine", "wine_tmp"]) # Création d'un meilleur vin et d'un vin tmp
+    pred_best_wine = np.array([0, 0])
+    nb_ite_max = 0
+
+    # Choix de l'ordre de parcourt des variables explicatives
+    new_order_input_var = __order_input_var(input_variable, list(model.feature_importances_ ))
+
+    # On recommence tant qu'on n'a pas atteint la catégorie max ou que le nombre d'itération est dépassé
+    while (pred_best_wine[0] < int_max_quality and nb_ite_max < 1000):
+        # On s'intéresse à chaque variable explicative
+        for col_name in new_order_input_var:
+            dataframe_new_wine[col_name]["best_wine"] = df_max_quality[col_name].iloc[0]
+            dataframe_new_wine[col_name]["wine_tmp"] = dataframe_new_wine[col_name]["best_wine"]
+            
+            # On parcourt tous les vins un par un
+            for index, row in df_max_quality.iterrows():
+                dataframe_new_wine[col_name]["best_wine"] = row[col_name]
+
+                dataframe_new_wine_scaled = pd.DataFrame(scaler.transform(dataframe_new_wine), columns = input_variable, index = ["best_wine", "wine_tmp"]) # transforming feature dataframe into standardized feature dataframe
+                pred_best_wine = model.predict(dataframe_new_wine_scaled)
+
+                if pred_best_wine[1] > pred_best_wine[0]:
+                    dataframe_new_wine[col_name]["best_wine"] = dataframe_new_wine[col_name]["wine_tmp"]
+        nb_ite_max += 1 # on incrémente le nombre d'itéraion
+
+    return {"ideal_wine": dataframe_new_wine.loc["best_wine"]}
 
 # GET /api/model permet d’obtenir le modèle sérialisé
 def get_model() :
@@ -433,10 +486,7 @@ def model_train():
     scaler = StandardScaler()  # instantiating StandardScaler class
     scaler.fit(input_data_train)  # fitting standardization on feature dataframe
     X_train_scaled = pd.DataFrame(scaler.transform(input_data_train), columns = input_variable) # transforming feature dataframe into standardized feature dataframe
-    
-    # Reentraine le modèle
-    #model_rfc = train_random_forest_classifier((input_data_train, input_data_test, output_data_train, output_data_test, input_variable, output_variable)
-        
+     
     # instantiate the classifier 
     model_rfc = RandomForestClassifier(n_estimators=100, random_state=0)
     model_rfc.fit(X_train_scaled, output_data_train.values.ravel())
@@ -445,26 +495,3 @@ def model_train():
     __save_model(model_rfc)
 
     return {"post" : "Nouveau modèle entraîné avec succès !"}
-
-# TODO : à supprimer à la fin
-def test_fct():
-    #model_train()
-    get_model_information()
-    
-    """new_wine = Wine()
-
-    new_wine.fixed_acidity = 11.2
-    new_wine.volatile_acidity = 0.7
-    new_wine.citric_acid = 0.0
-    new_wine.residual_sugar = 1.9
-    new_wine.chlorides = 0.076
-    new_wine.free_sulfur_dioxide = 11.0
-    new_wine.total_sulfur_dioxide = 34.0
-    new_wine.density = 0.9978
-    new_wine.pH = 3.51
-    new_wine.sulphates = 0.56
-    new_wine.alcohol = 9.4"""
-
-    prediction()
-
-test_fct()
