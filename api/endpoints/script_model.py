@@ -336,11 +336,6 @@ def prediction(new_wine : Wine) -> int :
 
     return {"prediction" : prediction[0]}
 
-<<<<<<< HEAD
-
-# TODO : à faire :'(
-=======
->>>>>>> origin/modele_ML
 # GET /api/predict
 def find_perfect_wine() -> dict :
     """ 
@@ -521,32 +516,3 @@ def model_train():
 
     # Sauvegarde le modèle
     __save_model(model_rfc)
-
-<<<<<<< HEAD
-    return {"post" : "Nouveau modèle entraîné avec succès !"}
-
-# TODO : à supprimer à la fin
-def test_fct():
-    #model_train()
-    get_model_information()
-    
-    """new_wine = Wine()
-
-    new_wine.fixed_acidity = 11.2
-    new_wine.volatile_acidity = 0.7
-    new_wine.citric_acid = 0.0
-    new_wine.residual_sugar = 1.9
-    new_wine.chlorides = 0.076
-    new_wine.free_sulfur_dioxide = 11.0
-    new_wine.total_sulfur_dioxide = 34.0
-    new_wine.density = 0.9978
-    new_wine.pH = 3.51
-    new_wine.sulphates = 0.56
-    new_wine.alcohol = 9.4"""
-
-    prediction()
-
-#test_fct()
-=======
-    return {"post" : "Nouveau modèle entraîné avec succès !"}
->>>>>>> origin/modele_ML
