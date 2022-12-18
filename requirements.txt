@@ -1,2 +1,8 @@
 fastapi[all]
 pandas
+pydantic
+ConfigParser
+scikit-learn
+seaborn
+matplotlib
+statsmodels

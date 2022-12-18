@@ -1,2 +1,6 @@
 __pycache__/*
 .venv/*
+.ipynb_checkpoints/*
+datasource/.~lock.Wines.csv#
+api/endpoints/__pycache__
+api/endpoints/.venv
