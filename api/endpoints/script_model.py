@@ -347,12 +347,14 @@ def get_model() :
     return model
 
 # GET /api/model/description permet d’obtenir des informations sur le modèle
-def get_model_information():
-    """ Gets informations about the model such as:
+def get_model_information() -> dict :
+    """Gets informations about the model such as:
         - parameters
         - performance metrics over the test data
         - other (depends on the algorithme)
 
+    Returns:
+        dict: return informations of the model
     """
     # Get model
     model = __load_model()
@@ -371,23 +373,16 @@ def get_model_information():
     # Prediction
     y_prediction = model.predict(X_test_scaled)
 
-    # Accuracy
-    print('Model accuracy score with 10 decision-trees : {0:0.4f}%\n'. format(accuracy_score(y_test, y_prediction)*100))
-
-    # Prediction VS True value
-    pred = pd.DataFrame({'Actual': y_test["quality"].tolist(), 'Predicted': y_prediction})
-    print('Some actual values VS Predictions :\n', pred.head(10))
-
     # Print the Confusion Matrix and slice it into four pieces
     cm = confusion_matrix(y_test, y_prediction)
-    print('\n\nConfusion matrix :\n', cm)
+    
+    dict_result = {
+        "Pamètres du modèle": model.get_params(),
+        "Métriques principales": classification_report(y_test, y_prediction, zero_division = 1),
+        "Matrice de confusion sur y_test" : cm
+    }
 
-    y = list(y_train)
-    y.extend(y_test)
-    y = set(y)
-
-    # show the main metrics
-    print("\n\nMain metrics of the model :\n", classification_report(y_test, y_prediction, zero_division = 1))
+    return dict_result
 
 # PUT /api/model
 def add_wine(dict_wine_to_add : dict):

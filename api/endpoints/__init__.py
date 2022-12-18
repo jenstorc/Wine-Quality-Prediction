@@ -75,7 +75,7 @@ Permet de réaliser une prédiction en donnant en body les données nécessaires
 • La prédiction devra être donnée via une note sur 10 du vin entré.
 """
 @app.post("/api/predict/") 
-async def predict_quality(wine: Wine, quality: int = None):
+async def predict_quality(wine: Wine):
     quality = script_model.prediction(wine)
     return {"predicted_quality": int(quality)}
 
